@@ -1,0 +1,27 @@
+program: sweep_1.py
+method: grid 
+project: fastaudio-esc-50
+parameters:
+  sample_rate:
+    value: 44100
+  n_fft:
+    value: 8192
+  n_mels:
+    values: [128, 256, 384, 512, 768, 1024]
+  hop_length:
+    values: [128, 256, 384, 512, 768, 1024]
+  win_length:
+    values: [1024, 1280, 1536, 1792, 2048]
+  n_epochs:
+    value: 20
+  batch_size:
+    value: 64 
+  mix_up:
+    value: 0.4
+  arch:
+    values:
+      - resnet18
+      - resnet34
+      - resnet50
+      - densenet121
+      - densenet161
