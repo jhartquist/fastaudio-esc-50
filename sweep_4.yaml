@@ -1,0 +1,30 @@
+program: sweep_4.py
+method: grid 
+project: fastaudio-esc-50
+parameters:
+  sample_rate:
+    value: 44100
+  n_fft:
+    value: 4096
+  n_mels:
+    value: 384
+  hop_length:
+    value: 441
+  win_length:
+    value: 1764
+  n_epochs:
+    value: 50
+  batch_size:
+    value: 64
+  arch:
+    value: resnet34
+  pitch_shift:
+    values: [False, True]
+  signal_shift:
+    values: [False, True]
+  add_noise:
+    values: [False, True]
+  mix_up:
+    values: [False, True]
+  trial:
+    values: [1, 2, 3, 4, 5]
