@@ -75,7 +75,6 @@ learn = cnn_learner(
 )
 
 learn.to_fp16()
-learn.to_parallel([0, 1])
 
 wandb_cb = WandbCallback(log_model=False, log_preds=False)
 cbs = [wandb_cb, MixUp(config.mix_up)]
