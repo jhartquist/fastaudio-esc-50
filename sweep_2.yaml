@@ -1,0 +1,13 @@
+program: sweep_2.py
+method: grid 
+project: fastaudio-esc-50
+parameters:
+  n_mels:
+    values: [128, 192, 256] 
+  arch:
+    values:
+      - resnet18
+      - resnet34
+      - resnet50
+      - densenet121
+      - densenet201

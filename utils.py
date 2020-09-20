@@ -11,53 +11,21 @@ def CrossValidationSplitter(col='fold', fold=1):
         return IndexSplitter(mask2idxs(valid_idx))(o)
     return _inner
 
+class StackedMelSpecs(Transform):
+    "Stacks Mel spectrograms with different resolutions into a single image."
+    
+    def __init__(self, n_fft, n_mels, sample_rate, win_lengths, hop_length):
+        store_attr()
+        # mel spectrum extractors
+        assert max(win_lengths) <= n_fft
+        self.specs = [AudioToSpec.from_cfg(
+            AudioConfig.BasicMelSpectrogram(n_fft=n_fft,
+                                            hop_length=hop_length,
+                                            win_length=win_length,
+                                            normalized=True,
+                                            n_mels=n_mels,
+                                            sample_rate=sample_rate)) 
+                      for win_length in win_lengths]
 
-def get_audio_config(sample_rate: int, 
-                     n_fft: int, 
-                     win_length: int, 
-                     hop_length: int, 
-                     normalized: bool = False,
-                     win_name: str = 'hann', 
-                     n_mels: Optional[int] = None):
-    window_fn = get_window_fn(win_name)
-    if n_mels is not None:
-        return AudioConfig.BasicMelSpectrogram(
-            sample_rate=sample_rate,
-            n_fft=n_fft,
-            win_length=win_length,
-            window_fn=window_fn,
-            hop_length=hop_length,
-            normalized=normalized,
-            n_mels=n_mels,
-        )
-    else:
-        return AudioConfig.BasicSpectrogram(
-            n_fft=n_fft,
-            win_length=win_length,
-            window_fn=window_fn,
-            hop_length=hop_length,
-            normalized=normalized,
-        )
-
-def get_data_block(audio_path, 
-                   sample_rate,
-                   fold_num, 
-                   audio_config, 
-                   signal_tfms):
-    audio_to_spec = AudioToSpec.from_cfg(audio_config)
-    audio_block = AudioBlock(sample_rate=sample_rate)
-    dblock = DataBlock(blocks=(audio_block, CategoryBlock),  
-                       get_x=ColReader("filename", pref=audio_path),
-                       splitter=CrossValidationSplitter(fold=fold_num),
-                       item_tfms=signal_tfms,
-                       batch_tfms = [audio_to_spec],
-                       get_y=ColReader("category"))
-    return dblock
-
-
-def get_learner(data, arch, mix_up = None):
-    return cnn_learner(data,
-                       arch, 
-                       config=cnn_config(n_in=1),
-                       loss_fn=CrossEntropyLossFlat,
-                       metrics=accuracy)
+    def encodes(self, x: AudioTensor) -> AudioSpectrogram:       
+        return AudioSpectrogram(torch.cat([spec(x) for spec in self.specs], axis=1))
